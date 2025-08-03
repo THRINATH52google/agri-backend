@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+langchain
+openai
+pydantic
+python-multipart
+beautifulsoup4
+requests
+lxml
+sentencepiece
+transformers
+langchainhub
+langchain-community
+python-dotenv
+
