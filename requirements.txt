@@ -12,4 +12,6 @@ transformers
 langchainhub
 langchain-community
 python-dotenv
+langchain-openai
+
 
