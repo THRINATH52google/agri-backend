@@ -3,8 +3,9 @@ from pydantic import BaseModel
 from agent import run_agent_with_memory, create_new_conversation
 from utils.translator import detect_language, translate_to_english, translate_to_local
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Dict, List
-from datetime import datetime
+from tools.disease_detector import detect_plant_disease
+from typing import Dict, List, Optional
+from fastapi import FastAPI, Request, File, UploadFile, Form
 
 app = FastAPI()
 
@@ -20,6 +21,8 @@ app.add_middleware(
 # Single global conversation memory
 global_conversation = create_new_conversation()
 
+class DiseaseInput(BaseModel):
+    leaf_description: str
 
 class QueryInput(BaseModel):
     query: str
@@ -71,3 +74,36 @@ async def clear_conversation():
 @app.get("/")
 async def healthcheck():
     return {"status": "up"}
+
+
+@app.post("/detect-disease")
+async def detect_disease(file: UploadFile = File(...)):
+    """Detect plant disease and suggest pesticides based on uploaded image"""
+
+    try:
+        # Validate image file
+        if not file.content_type.startswith('image/'):
+            return {"solution": "Please upload an image file (JPEG, PNG, etc.)"}
+
+        if file.size > 10 * 1024 * 1024:  # 10MB limit
+            return {"solution": "Image file too large. Please upload an image smaller than 10MB."}
+
+        # Read image data
+        image_data = await file.read()
+
+        print(f"[Disease Detection] Image uploaded: {file.filename} ({len(image_data)} bytes)")
+
+        # Detect disease and get recommendations (no description needed)
+        english_result = detect_plant_disease("", image_data)
+
+        # Return with 'solution' key to match frontend expectation
+        return {"solution": english_result}
+
+    except Exception as e:
+        return {"solution": f"Error processing image: {str(e)}"}
+
+
+@app.post("/detect-disease/")
+async def detect_disease_with_slash(file: UploadFile = File(...)):
+    """Same endpoint with trailing slash for compatibility"""
+    return await detect_disease(file)

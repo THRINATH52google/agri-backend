@@ -14,5 +14,8 @@ langchain-community
 python-dotenv
 langchain-openai
 langchain-groq
+langdetect
+Pillow
+numpy
 
 
