@@ -13,5 +13,6 @@ langchainhub
 langchain-community
 python-dotenv
 langchain-openai
+langchain-groq         # <-- Core dependency for Groq
 
 
