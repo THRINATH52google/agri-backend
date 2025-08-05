@@ -3,15 +3,18 @@ import os
 
 import requests
 from datetime import datetime
-from langchain.tools import tool
 
-# Public API (you may replace with OpenWeatherMap or IMD APIs)
-WEATHER_API_URL = "https://api.weatherapi.com/v1/forecast.json"
-API_KEY = os.getenv("weather")
-@tool
+
 def get_weather_forecast(location: str) -> str:
     """Get current and 3-day forecast for a location (village, district)."""
+    if not location or location.strip() == "":
+        return "❌ Please provide a location (city, village, or district) to get weather information."
+
     try:
+        # Public API (you may replace with OpenWeatherMap or IMD APIs)
+        WEATHER_API_URL = "https://api.weatherapi.com/v1/forecast.json"
+        API_KEY = ""
+
         response = requests.get(
             WEATHER_API_URL,
             params={
@@ -24,7 +27,7 @@ def get_weather_forecast(location: str) -> str:
         )
         data = response.json()
         if "error" in data:
-            return f"Error: {data['error']['message']}"
+            return f"❌ Weather API Error: {data['error']['message']}. Please check the location name."
 
         forecast_data = data["forecast"]["forecastday"]
         result = f"🌦️ Weather Forecast for {location}:\n"
@@ -46,4 +49,4 @@ def get_weather_forecast(location: str) -> str:
         return result
 
     except Exception as e:
-        return f"Failed to get weather: {str(e)}"
+        return f"❌ Failed to get weather for {location}: {str(e)}"
