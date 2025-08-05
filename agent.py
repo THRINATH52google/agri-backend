@@ -14,7 +14,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-groq_key=""
+groq_key=os.getenv("grok")
 
 # llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", openai_api_key=OPENAI_API_KEY)
 llm = ChatGroq(

@@ -1,4 +1,5 @@
 # app/agents/tools/weather.py
+import os
 
 import requests
 from datetime import datetime
@@ -6,7 +7,7 @@ from langchain.tools import tool
 
 # Public API (you may replace with OpenWeatherMap or IMD APIs)
 WEATHER_API_URL = "https://api.weatherapi.com/v1/forecast.json"
-API_KEY = ""
+API_KEY = os.getenv("weather")
 @tool
 def get_weather_forecast(location: str) -> str:
     """Get current and 3-day forecast for a location (village, district)."""
