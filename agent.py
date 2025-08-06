@@ -10,12 +10,14 @@ from langchain_groq import ChatGroq
 from deep_translator import GoogleTranslator
 from datetime import datetime
 from typing import Dict, List, Tuple
+import os
+
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-groq_key = ""
+groq_key = os.getenv("GROQ_API_KEY")
 
 llm = ChatGroq(
     model="meta-llama/llama-4-scout-17b-16e-instruct",

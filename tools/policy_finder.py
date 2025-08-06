@@ -5,7 +5,7 @@ from langchain.utilities import asyncio
 from langchain_core.tools import tool
 
 # Groq Configuration
-GROK_API_KEY = ""  # Replace default for testing
+GROK_API_KEY = os.getenv("GROQ_API_KEY")  # Replace default for testing
 GROK_API_URL = "https://api.x.ai/v1/chat/completions"
 GROK_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 

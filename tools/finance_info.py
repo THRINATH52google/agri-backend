@@ -8,7 +8,7 @@ import os
 import json  # To potentially parse structured JSON if Grok supports it
 
 # Configuration for Grok (assuming these are loaded from .env or config)
-GROK_API_KEY = ""
+GROK_API_KEY = os.getenv("GROQ_API_KEY")
 GROK_API_URL = "https://api.x.ai/v1/chat/completions"  # Confirm with Grok API docs
 GROK_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"  # Use the model suitable for detailed information
 

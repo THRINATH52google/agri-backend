@@ -13,7 +13,7 @@ def get_weather_forecast(location: str) -> str:
     try:
         # Public API (you may replace with OpenWeatherMap or IMD APIs)
         WEATHER_API_URL = "https://api.weatherapi.com/v1/forecast.json"
-        API_KEY = ""
+        API_KEY = os.getenv("WEATHER_API_KEY")
 
         response = requests.get(
             WEATHER_API_URL,
