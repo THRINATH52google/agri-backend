@@ -17,5 +17,6 @@ langchain-groq
 langdetect
 Pillow
 numpy
+deep-translator
 
 
