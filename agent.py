@@ -97,37 +97,27 @@ async def run_agent_with_memory(
         # Create agent with memory
         agent = create_agent_with_memory(memory)
 
-        # Step 1: Translate the user's query to English if needed
-        if language != "en":
-            translated_query = GoogleTranslator(source=language, target="en").translate(query)
-        else:
-            translated_query = query
+        # The query is already translated to English by main.py
+        # Just run the agent with the English query
+        english_response = await run_in_threadpool(agent.run, query)
 
-        # Step 2: Run the agent with the translated English query
-        english_response = await run_in_threadpool(agent.run, translated_query)
-
-        # Step 3: Translate the agent's response back to the user's language
-        if language != "en":
-            final_response = GoogleTranslator(source="en", target=language).translate(english_response)
-        else:
-            final_response = english_response
-
-        # Step 4: Update conversation history
+        # Update conversation history
         conversation_entry = {
             "timestamp": datetime.now().isoformat(),
-            "user_message": query,
+            "user_message": query,  # This is the English version from main.py
             "user_language": language,
-            "agent_response": final_response,
-            "english_query": translated_query,
+            "agent_response": english_response,  # Keep as English, let main.py translate
+            "english_query": query,
             "english_response": english_response
         }
 
         conversation_data["conversation_history"].append(conversation_entry)
 
-        return final_response, conversation_data["conversation_history"]
+        # Return English response, let main.py handle translation
+        return english_response, conversation_data["conversation_history"]
 
     except Exception as e:
-        error_response = f"❌ Translation/Agent error: {str(e)}"
+        error_response = f"❌ Agent error: {str(e)}"
         conversation_entry = {
             "timestamp": datetime.now().isoformat(),
             "user_message": query,
