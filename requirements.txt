@@ -18,5 +18,8 @@ langdetect
 Pillow
 numpy
 deep-translator
-
+SpeechRecognition==3.10.0
+gtts==2.3.2
+pydub==0.25.1
+numpy==1.24.3
 
