@@ -11,6 +11,7 @@ from typing import Tuple, Optional, List
 import logging
 import subprocess
 import whisper
+from langdetect import detect, LangDetectException
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -236,6 +237,16 @@ class SimpleVoiceProcessor:
         
         return audio_segment
 
+    # Add this mapping at the top of your speech_to_text function or as a class attribute
+    LANGUAGE_CORRECTIONS = {
+        "af": "en",  # Afrikaans -> English (common misclassification)
+        "nl": "en",  # Dutch -> English (sometimes misclassified)
+        "de": "en",  # German -> English (sometimes misclassified)
+        "da": "en",  # Danish -> English (sometimes misclassified)
+        "no": "en",  # Norwegian -> English (sometimes misclassified)
+        "sv": "en",  # Swedish -> English (sometimes misclassified)
+    }
+
     def speech_to_text(self, audio_data: bytes, language: str = "auto") -> Tuple[str, str]:
         try:
             logger.info(f"Starting speech_to_text with {len(audio_data)} bytes, language: {language}")
@@ -248,64 +259,67 @@ class SimpleVoiceProcessor:
             audio_segment.export(debug_file, format='wav')
             logger.info(f"Saved debug audio to: {debug_file}")
 
-            # Simple processing that was working before
+            # Standardize audio
             audio_segment = audio_segment.set_frame_rate(16000).set_channels(1)
-            
-            # Basic normalization
             current_dbfs = audio_segment.dBFS
             logger.info(f"Original audio dBFS: {current_dbfs}")
-            
             if current_dbfs < -30:
                 audio_segment = audio_segment + 20
-            
             logger.info(f"Processed audio dBFS: {audio_segment.dBFS}")
-            
+
             with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_wav:
-                audio_segment = audio_segment.set_frame_rate(16000).set_channels(1)
                 audio_segment.export(temp_wav.name, format='wav', parameters=["-acodec", "pcm_s16le"])
                 temp_name = temp_wav.name
-                logger.info(f"Exported processed WAV file: {temp_name}")
 
             with open(temp_name, 'rb') as wav_file:
                 wav_data = wav_file.read()
-                logger.info(f"WAV data size: {len(wav_data)} bytes")
             try:
                 os.unlink(temp_name)
             except Exception:
                 pass
 
-            # Do NOT skip the header!
             audio = sr.AudioData(wav_data, sample_rate=16000, sample_width=2)
-            logger.info(f"Created AudioData: {len(wav_data)} bytes")
 
-            # Try with the most basic approach first
-            try:
-                logger.info("Trying basic English recognition...")
-                text = self.recognizer.recognize_google(audio, language="en-US", show_all=False)
-                if text and text.strip():
-                    logger.info(f"Basic English recognition successful: '{text}'")
-                    return text, "en"
-            except sr.UnknownValueError:
-                logger.warning("Basic English recognition failed")
-            except sr.RequestError as e:
-                logger.error(f"Speech recognition service error: {e}")
+            # Try all languages and collect results
+            language_map = {
+                "en-IN": "en",
+                "en-US": "en",
+                "te-IN": "te",
+                "hi-IN": "hi"
+            }
+            languages_to_try = ["en-IN", "en-US","te-IN", "hi-IN"]
+            results = []
 
-            # If basic fails, try other languages
-            languages_to_try = ["en-IN", "te-IN", "hi-IN", "auto"]
-            
             for lang in languages_to_try:
                 try:
                     logger.info(f"Trying recognition with language: {lang}")
                     text = self.recognizer.recognize_google(audio, language=lang, show_all=False)
                     if text and text.strip():
-                        logger.info(f"Recognition successful with language {lang}: '{text}'")
-                        return text, lang
-                    else:
-                        logger.warning(f"Empty result with language {lang}")
+                        try:
+                            detected_lang = detect(text)
+                            # Apply language corrections
+                            corrected_lang = self.LANGUAGE_CORRECTIONS.get(detected_lang, detected_lang)
+                            logger.info(f"Recognition with {lang}: '{text}' | Detected: {detected_lang} -> Corrected: {corrected_lang}")
+                            results.append((text, lang, corrected_lang))
+                        except LangDetectException:
+                            logger.warning(f"Could not detect language for text: '{text}'")
                 except sr.UnknownValueError:
                     logger.warning(f"Could not recognize speech with language {lang}")
                 except sr.RequestError as e:
                     logger.error(f"Speech recognition service error with language {lang}: {e}")
+
+            # Prefer result where recognizer language matches detected language
+            for text, recog_lang, detected_lang in results:
+                expected_lang = language_map.get(recog_lang)
+                if detected_lang == expected_lang:
+                    logger.info(f"Selected transcription: '{text}' with language: {detected_lang}")
+                    return text, detected_lang
+
+            # Fallback: return the first result if no match
+            if results:
+                text, recog_lang, detected_lang = results[0]
+                logger.info(f"Fallback transcription: '{text}' with language: {detected_lang}")
+                return text, detected_lang
 
             logger.warning("All speech recognition attempts failed")
             return "", "en"
@@ -328,10 +342,11 @@ class SimpleVoiceProcessor:
             tts = gTTS(text=text, lang=tts_lang, slow=False)
             with tempfile.NamedTemporaryFile(delete=False, suffix='.mp3') as temp_file:
                 tts.save(temp_file.name)
-                with open(temp_file.name, 'rb') as f:
-                    audio_bytes = f.read()
-                os.unlink(temp_file.name)
-                return audio_bytes
+                temp_name = temp_file.name
+            with open(temp_name, 'rb') as f:
+                audio_bytes = f.read()
+            os.unlink(temp_name)
+            return audio_bytes
         except Exception as e:
             logger.error(f"Text to speech error: {e}")
             return b""
