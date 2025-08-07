@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # Install system dependencies including FFmpeg
 RUN apt-get update && apt-get install -y \
@@ -10,6 +10,7 @@ WORKDIR /app
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
 
 # Copy application code
