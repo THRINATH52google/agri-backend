@@ -8,10 +8,16 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
+# Copy requirements first (better caching)
 COPY requirements.txt .
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install -r requirements.txt
+
+# Upgrade pip & set retry settings
+RUN pip install --upgrade pip setuptools wheel \
+    && pip config set global.timeout 100 \
+    && pip config set global.retries 10
+
+# Install Python dependencies with retries & no cache
+RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.org/simple
 
 # Copy application code
 COPY . .
@@ -20,4 +26,4 @@ COPY . .
 EXPOSE 8000
 
 # Start the application
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
