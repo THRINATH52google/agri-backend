@@ -1,14 +1,36 @@
 fastapi==0.111.1
 uvicorn==0.30.1
-langchain==0.2.6
-langchain-core==0.2.12
-langchain-community==0.2.6
-groq==0.3.1
-googletrans==4.0.0rc1
-requests==2.32.3
-pandas==2.2.2
-numpy==1.26.4
-pydantic==2.7.4
 python-dotenv==1.0.1
+pydantic==2.7.4
+requests==2.32.3
+beautifulsoup4
+lxml
+python-multipart
+Pillow
+
+# LangChain and AI dependencies
+langchain==0.2.6
+langchain-community==0.2.6
+langchain-core==0.2.12
+langchainhub
+langchain-openai
+langchain-groq==0.31.0
+openai
+groq==0.31.0
+transformers
+sentencepiece
+
+# Speech and Translation dependencies
+whisper
+SpeechRecognition==3.10.0
+gtts==2.3.2
+pydub==0.25.1
+
+googletrans==4.0.0-rc1
+deep-translator
+
+# General utilities and build tools
 setuptools
 wheel
+numpy==1.26.4
+pandas==2.2.2
