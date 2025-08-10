@@ -14,7 +14,7 @@ langchain-community==0.2.6
 langchain-core==0.2.12
 langchainhub
 langchain-openai
-langchain-groq==0.31.0
+langchain-groq==0.3.7
 openai
 groq==0.31.0
 transformers
