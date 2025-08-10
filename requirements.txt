@@ -1,43 +1,14 @@
-# build helpers
-setuptools>=65.5.0
-wheel>=0.40.0
-
-# web / app
-fastapi==0.115.0
-uvicorn==0.30.6
-
-# LangChain ecosystem (pinned to compatible 0.2.x set)
-langchain==0.2.15
-langchain-community==0.2.2
-langchainhub==0.1.21
-langchain-openai==0.1.8
-langchain-groq==0.1.4
-langchain-text-splitters==0.2.2
-
-# OpenAI + ML infra
-openai==1.40.3
-pydantic==2.8.2
-pydantic-core==2.23.4
-
-# parsing / utils
-python-multipart==0.0.9
-python-dotenv==1.0.1
-beautifulsoup4==4.12.3
+fastapi==0.111.1
+uvicorn==0.30.1
+langchain==0.2.6
+langchain-core==0.2.12
+langchain-community==0.2.6
+groq==0.3.1
+googletrans==4.0.0rc1
 requests==2.32.3
-lxml==5.2.2
-langdetect==1.0.9
-deep-translator==1.11.4
-
-# NLP / speech
-sentencepiece==0.2.0
-transformers==4.44.2
-# whisper (installed from github to avoid some wheel/pip conflicts)
-git+https://github.com/openai/whisper.git
-
-# imaging / audio / helpers
-Pillow==10.4.0
-numpy>=1.26.0
-SpeechRecognition==3.10.0
-gtts==2.3.2
-pydub==0.25.1
-googletrans==4.0.0-rc1
+pandas==2.2.2
+numpy==1.26.4
+pydantic==2.7.4
+python-dotenv==1.0.1
+setuptools
+wheel
