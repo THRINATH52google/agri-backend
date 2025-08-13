@@ -20,6 +20,7 @@ openai
 groq
 transformers
 sentencepiece
+langdetect
 
 # Speech and Translation dependencies
 whisper
